@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Ichancy Spin</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+body {
+  background:#0b1220;
+  color:white;
+  text-align:center;
+  font-family:Arial;
+}
+#wheel {
+  width:280px;
+  height:280px;
+  border-radius:50%;
+  border:10px solid #1e90ff;
+  margin:40px auto;
+  background:conic-gradient(
+    #1e90ff 0deg 60deg,
+    #0b1220 60deg 120deg,
+    #1e90ff 120deg 180deg,
+    #0b1220 180deg 240deg,
+    #1e90ff 240deg 300deg,
+    #0b1220 300deg 360deg
+  );
+  transition:transform 4s ease-out;
+}
+button {
+  padding:15px 30px;
+  font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🎡 اللفة المجانية</h2>
+<div id="wheel"></div>
+<button onclick="spin()">RESPIN</button>
+
+<script>
+const tg = Telegram.WebApp;
+let used = false;
+
+function spin() {
+  if (used) return;
+  used = true;
+
+  const rewards = [0, 1000, 5000, 10000, 20000];
+  const reward = rewards[Math.floor(Math.random()*rewards.length)];
+
+  const deg = 360 * 6 + Math.floor(Math.random()*360);
+  document.getElementById("wheel").style.transform = `rotate(${deg}deg)`;
+
+  setTimeout(() => {
+    tg.sendData(JSON.stringify({
+      type: "spin",
+      reward: reward
+    }));
+    tg.close();
+  }, 4500);
+}
+</script>
+
+</body>
+</html>
