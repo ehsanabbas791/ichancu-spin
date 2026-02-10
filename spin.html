@@ -2,65 +2,131 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Ichancy Spin</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>Wheel Spin</title>
 <style>
-body {
-  background:#0b1220;
-  color:white;
-  text-align:center;
-  font-family:Arial;
-}
-#wheel {
-  width:280px;
-  height:280px;
-  border-radius:50%;
-  border:10px solid #1e90ff;
-  margin:40px auto;
-  background:conic-gradient(
-    #1e90ff 0deg 60deg,
-    #0b1220 60deg 120deg,
-    #1e90ff 120deg 180deg,
-    #0b1220 180deg 240deg,
-    #1e90ff 240deg 300deg,
-    #0b1220 300deg 360deg
-  );
-  transition:transform 4s ease-out;
-}
-button {
-  padding:15px 30px;
-  font-size:18px;
-}
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at top, #0a1a2f, #020b16);
+        font-family: Arial, sans-serif;
+        color: #fff;
+    }
+
+    .wheel-container {
+        position: relative;
+        width: 360px;
+        height: 360px;
+    }
+
+    .pointer {
+        position: absolute;
+        top: -18px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 14px solid transparent;
+        border-right: 14px solid transparent;
+        border-bottom: 22px solid #cfd8dc;
+        z-index: 10;
+    }
+
+    .wheel {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background:
+            conic-gradient(
+                #b7d6e8 0deg 45deg,
+                #0c1f33 45deg 90deg,
+                #8fc4e3 90deg 135deg,
+                #0c1f33 135deg 180deg,
+                #b7d6e8 180deg 225deg,
+                #0c1f33 225deg 270deg,
+                #8fc4e3 270deg 315deg,
+                #0c1f33 315deg 360deg
+            );
+        box-shadow: 0 0 30px rgba(0,0,0,.6);
+        transition: transform 4s cubic-bezier(0.17, 0.67, 0.14, 0.99);
+        position: relative;
+    }
+
+    .label {
+        position: absolute;
+        width: 50%;
+        top: 50%;
+        left: 50%;
+        transform-origin: left center;
+        font-size: 14px;
+        font-weight: bold;
+        color: #fff;
+        text-align: left;
+        padding-left: 10px;
+    }
+
+    .center-btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90px;
+        height: 90px;
+        background: radial-gradient(circle, #e6f2f8, #7aa9c9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0c1f33;
+        font-weight: bold;
+        cursor: pointer;
+        user-select: none;
+        box-shadow: inset 0 0 10px rgba(0,0,0,.3);
+    }
+
+    .footer {
+        position: absolute;
+        bottom: -70px;
+        width: 100%;
+        text-align: center;
+        font-size: 14px;
+        opacity: .9;
+    }
 </style>
 </head>
-
 <body>
 
-<h2>🎡 اللفة المجانية</h2>
-<div id="wheel"></div>
-<button onclick="spin()">RESPIN</button>
+<div class="wheel-container">
+    <div class="pointer"></div>
+
+    <div id="wheel" class="wheel">
+        <div class="label" style="transform: rotate(22.5deg) translateY(-50%);">10%</div>
+        <div class="label" style="transform: rotate(67.5deg) translateY(-50%);">Telegram Premium</div>
+        <div class="label" style="transform: rotate(112.5deg) translateY(-50%);">RESPIN</div>
+        <div class="label" style="transform: rotate(157.5deg) translateY(-50%);">10,000</div>
+        <div class="label" style="transform: rotate(202.5deg) translateY(-50%);">20,000</div>
+        <div class="label" style="transform: rotate(247.5deg) translateY(-50%);">Hard Luck</div>
+        <div class="label" style="transform: rotate(292.5deg) translateY(-50%);">BONUS</div>
+        <div class="label" style="transform: rotate(337.5deg) translateY(-50%);">5%</div>
+    </div>
+
+    <div class="center-btn" onclick="spin()">RESPIN</div>
+
+    <div class="footer">يجب أن تشحن اليوم للحصول على تدويرة مجانية</div>
+</div>
 
 <script>
-const tg = Telegram.WebApp;
-let used = false;
+let rotation = 0;
 
 function spin() {
-  if (used) return;
-  used = true;
+    const spins = Math.floor(Math.random() * 4) + 4; // عدد اللفات
+    const angle = Math.floor(Math.random() * 360);
 
-  const rewards = [0, 1000, 5000, 10000, 20000];
-  const reward = rewards[Math.floor(Math.random()*rewards.length)];
-
-  const deg = 360 * 6 + Math.floor(Math.random()*360);
-  document.getElementById("wheel").style.transform = `rotate(${deg}deg)`;
-
-  setTimeout(() => {
-    tg.sendData(JSON.stringify({
-      type: "spin",
-      reward: reward
-    }));
-    tg.close();
-  }, 4500);
+    rotation += spins * 360 + angle;
+    document.getElementById('wheel').style.transform =
+        `rotate(${rotation}deg)`;
 }
 </script>
 
