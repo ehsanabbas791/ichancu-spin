@@ -1,134 +1,563 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>Wheel Spin</title>
-<style>
-    body {
-        margin: 0;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: radial-gradient(circle at top, #0a1a2f, #020b16);
-        font-family: Arial, sans-serif;
-        color: #fff;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎡 عجلة الحظ - Ichancy</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .wheel-container {
-        position: relative;
-        width: 360px;
-        height: 360px;
-    }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a2942 50%, #0f1f3a 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
 
-    .pointer {
-        position: absolute;
-        top: -18px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 14px solid transparent;
-        border-right: 14px solid transparent;
-        border-bottom: 22px solid #cfd8dc;
-        z-index: 10;
-    }
+        /* خلفية النجوم */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
 
-    .wheel {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        background:
-            conic-gradient(
-                #b7d6e8 0deg 45deg,
-                #0c1f33 45deg 90deg,
-                #8fc4e3 90deg 135deg,
-                #0c1f33 135deg 180deg,
-                #b7d6e8 180deg 225deg,
-                #0c1f33 225deg 270deg,
-                #8fc4e3 270deg 315deg,
-                #0c1f33 315deg 360deg
-            );
-        box-shadow: 0 0 30px rgba(0,0,0,.6);
-        transition: transform 4s cubic-bezier(0.17, 0.67, 0.14, 0.99);
-        position: relative;
-    }
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
 
-    .label {
-        position: absolute;
-        width: 50%;
-        top: 50%;
-        left: 50%;
-        transform-origin: left center;
-        font-size: 14px;
-        font-weight: bold;
-        color: #fff;
-        text-align: left;
-        padding-left: 10px;
-    }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
 
-    .center-btn {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 90px;
-        height: 90px;
-        background: radial-gradient(circle, #e6f2f8, #7aa9c9);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #0c1f33;
-        font-weight: bold;
-        cursor: pointer;
-        user-select: none;
-        box-shadow: inset 0 0 10px rgba(0,0,0,.3);
-    }
+        .container {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
 
-    .footer {
-        position: absolute;
-        bottom: -70px;
-        width: 100%;
-        text-align: center;
-        font-size: 14px;
-        opacity: .9;
-    }
-</style>
+        h1 {
+            color: #fff;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(141, 213, 231, 0.5);
+        }
+
+        .subtitle {
+            color: #8dd5e7;
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            width: 360px;
+            height: 360px;
+            margin: 0 auto;
+        }
+
+        /* المؤشر */
+        .pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 35px solid #fff;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+            z-index: 100;
+        }
+
+        /* حاوية العجلة */
+        .wheel-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* العجلة نفسها */
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 0 0 8px #8dd5e7,
+                0 0 0 12px #1a3a52,
+                0 0 40px rgba(141, 213, 231, 0.5);
+            transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+
+        /* الأقسام */
+        .slice {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            overflow: hidden;
+        }
+
+        .slice-content {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 25%;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            font-size: 0.95rem;
+            line-height: 1.3;
+        }
+
+        /* القسم 1: 10% CASH */
+        .slice:nth-child(1) {
+            transform: rotate(0deg) skewY(-45deg);
+        }
+        .slice:nth-child(1) .slice-content {
+            background: #8dd5e7;
+            transform: skewY(45deg) rotate(22.5deg);
+            color: #1a3a52;
+        }
+
+        /* القسم 2: TELEGRAM PREMIUM */
+        .slice:nth-child(2) {
+            transform: rotate(45deg) skewY(-45deg);
+        }
+        .slice:nth-child(2) .slice-content {
+            background: #1a3a52;
+            transform: skewY(45deg) rotate(22.5deg);
+        }
+
+        /* القسم 3: RESPIN */
+        .slice:nth-child(3) {
+            transform: rotate(90deg) skewY(-45deg);
+        }
+        .slice:nth-child(3) .slice-content {
+            background: #8dd5e7;
+            transform: skewY(45deg) rotate(22.5deg);
+            color: #1a3a52;
+        }
+
+        /* القسم 4: 10,000 */
+        .slice:nth-child(4) {
+            transform: rotate(135deg) skewY(-45deg);
+        }
+        .slice:nth-child(4) .slice-content {
+            background: #1a3a52;
+            transform: skewY(45deg) rotate(22.5deg);
+        }
+
+        /* القسم 5: 000'0I (Hard Luck) */
+        .slice:nth-child(5) {
+            transform: rotate(180deg) skewY(-45deg);
+        }
+        .slice:nth-child(5) .slice-content {
+            background: #8dd5e7;
+            transform: skewY(45deg) rotate(22.5deg);
+            color: #1a3a52;
+        }
+
+        /* القسم 6: BONUS 5% */
+        .slice:nth-child(6) {
+            transform: rotate(225deg) skewY(-45deg);
+        }
+        .slice:nth-child(6) .slice-content {
+            background: #1a3a52;
+            transform: skewY(45deg) rotate(22.5deg);
+        }
+
+        /* القسم 7: 20,000 */
+        .slice:nth-child(7) {
+            transform: rotate(270deg) skewY(-45deg);
+        }
+        .slice:nth-child(7) .slice-content {
+            background: #8dd5e7;
+            transform: skewY(45deg) rotate(22.5deg);
+            color: #1a3a52;
+        }
+
+        /* القسم 8: HARD LUCK */
+        .slice:nth-child(8) {
+            transform: rotate(315deg) skewY(-45deg);
+        }
+        .slice:nth-child(8) .slice-content {
+            background: #1a3a52;
+            transform: skewY(45deg) rotate(22.5deg);
+        }
+
+        /* النجمة في المنتصف */
+        .center-star {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(145deg, #1a3a52, #0f1f3a);
+            border-radius: 50%;
+            border: 5px solid #8dd5e7;
+            box-shadow: 
+                0 0 20px rgba(141, 213, 231, 0.6),
+                inset 0 2px 10px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            z-index: 50;
+        }
+
+        /* زر الدوران */
+        .spin-btn {
+            margin-top: 50px;
+            padding: 18px 60px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #0f1f3a;
+            background: linear-gradient(145deg, #8dd5e7, #6bc4db);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 
+                0 8px 25px rgba(141, 213, 231, 0.5),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .spin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(141, 213, 231, 0.7);
+        }
+
+        .spin-btn:active {
+            transform: translateY(0);
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* النتيجة */
+        .result-box {
+            margin-top: 40px;
+            padding: 25px;
+            background: rgba(26, 58, 82, 0.8);
+            border: 3px solid #8dd5e7;
+            border-radius: 20px;
+            color: #fff;
+            font-size: 1.3rem;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .emoji-large {
+            font-size: 2.5rem;
+            margin-left: 15px;
+        }
+
+        /* الكونفيتي */
+        .confetti {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: #8dd5e7;
+            position: absolute;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .wheel-wrapper {
+                width: 300px;
+                height: 300px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .slice-content {
+                font-size: 0.8rem;
+                padding-left: 20%;
+            }
+
+            .spin-btn {
+                padding: 15px 45px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <h1>🎡 عجلة الحظ Ichancy</h1>
+        <p class="subtitle">أدر العجلة واربح جوائز مذهلة!</p>
+        
+        <div class="wheel-wrapper">
+            <div class="pointer"></div>
+            <div class="wheel-container">
+                <div class="wheel" id="wheel">
+                    <!-- القسم 1: 10% CASH -->
+                    <div class="slice">
+                        <div class="slice-content">
+                            <div>10%<br><b>CASH</b></div>
+                        </div>
+                    </div>
+                    
+                    <!-- القسم 2: TELEGRAM PREMIUM -->
+                    <div class="slice">
+                        <div class="slice-content">
+                            <div>⭐<br><small>TELEGRAM</small><br><b>PREMIUM</b></div>
+                        </div>
+                    </div>
+                    
+                    <!-- القسم 3: RESPIN -->
+                    <div class="slice">
+                        <div class="slice-content">
+                            <div><b>RESPIN</b><br>🔄</div>
+                        </div>
+                    </div>
+                    
+                    <!-- القسم 4: 10,000 -->
+                    <div class="slice">
+                        <div class="slice-content">
+                            <div><b>10,000</b><br>💰</div>
+                        </div>
+                    </div>
+                    
+                    <!-- القسم 5: 000'0I (مقلوب) -->
+                    <div class="slice">
+                        <div class="slice-content">
+                            <div>💰<br><b>000'0I</b></div>
+                        </div>
+                    </div>
+                    
+                    <!-- القسم 6: BONUS 5% -->
+                    <div class="slice">
+                        <div class="slice-content">
+                            <div><b>BONUS</b><br><small>5%</small></div>
+                        </div>
+                    </div>
+                    
+                    <!-- القسم 7: 20,000 -->
+                    <div class="slice">
+                        <div class="slice-content">
+                            <div><b>20,000</b><br>💰</div>
+                        </div>
+                    </div>
+                    
+                    <!-- القسم 8: HARD LUCK -->
+                    <div class="slice">
+                        <div class="slice-content">
+                            <div>⛔<br><small>HARD</small><br><b>LUCK</b></div>
+                        </div>
+                    </div>
+                    
+                    <!-- النجمة في المنتصف -->
+                    <div class="center-star">⭐</div>
+                </div>
+            </div>
+        </div>
 
-<div class="wheel-container">
-    <div class="pointer"></div>
+        <button class="spin-btn" id="spinBtn" onclick="spin()">
+            🎲 لف العجلة
+        </button>
 
-    <div id="wheel" class="wheel">
-        <div class="label" style="transform: rotate(22.5deg) translateY(-50%);">10%</div>
-        <div class="label" style="transform: rotate(67.5deg) translateY(-50%);">Telegram Premium</div>
-        <div class="label" style="transform: rotate(112.5deg) translateY(-50%);">RESPIN</div>
-        <div class="label" style="transform: rotate(157.5deg) translateY(-50%);">10,000</div>
-        <div class="label" style="transform: rotate(202.5deg) translateY(-50%);">20,000</div>
-        <div class="label" style="transform: rotate(247.5deg) translateY(-50%);">Hard Luck</div>
-        <div class="label" style="transform: rotate(292.5deg) translateY(-50%);">BONUS</div>
-        <div class="label" style="transform: rotate(337.5deg) translateY(-50%);">5%</div>
+        <div class="result-box" id="result">
+            <span>اضغط الزر لبدء اللعب!</span>
+        </div>
     </div>
 
-    <div class="center-btn" onclick="spin()">RESPIN</div>
+    <script>
+        // إضافة النجوم للخلفية
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
 
-    <div class="footer">يجب أن تشحن اليوم للحصول على تدويرة مجانية</div>
-</div>
+        const wheel = document.getElementById('wheel');
+        const spinBtn = document.getElementById('spinBtn');
+        const result = document.getElementById('result');
+        
+        let spinning = false;
+        let hasSpun = false;
 
-<script>
-let rotation = 0;
+        // الجوائز (بالترتيب من 0 إلى 7)
+        const prizes = [
+            { name: '10% CASH', value: 'percentage', emoji: '💰', amount: 10 },
+            { name: 'Telegram Premium', value: 'premium', emoji: '⭐', amount: 0 },
+            { name: 'Respin', value: 'respin', emoji: '🔄', amount: 0 },
+            { name: '10,000 رصيد', value: 10000, emoji: '💰', amount: 10000 },
+            { name: '10,000 رصيد', value: 10000, emoji: '💰', amount: 10000 },
+            { name: 'Bonus 5%', value: 'bonus', emoji: '🎁', amount: 5 },
+            { name: '20,000 رصيد', value: 20000, emoji: '💰', amount: 20000 },
+            { name: 'Hard Luck', value: 0, emoji: '⛔', amount: 0 }
+        ];
 
-function spin() {
-    const spins = Math.floor(Math.random() * 4) + 4; // عدد اللفات
-    const angle = Math.floor(Math.random() * 360);
+        // الأوزان (احتمالات الفوز)
+        const weights = [10, 5, 10, 15, 15, 10, 8, 27]; // المجموع = 100
 
-    rotation += spins * 360 + angle;
-    document.getElementById('wheel').style.transform =
-        `rotate(${rotation}deg)`;
-}
-</script>
+        function getRandomPrize() {
+            const random = Math.random() * 100;
+            let sum = 0;
+            
+            for (let i = 0; i < weights.length; i++) {
+                sum += weights[i];
+                if (random <= sum) {
+                    return i;
+                }
+            }
+            return 7; // Hard Luck كافتراضي
+        }
 
+        function spin() {
+            if (spinning || hasSpun) return;
+            
+            spinning = true;
+            hasSpun = true;
+            spinBtn.disabled = true;
+            result.innerHTML = '<span>🎡 العجلة تدور...</span>';
+
+            // اختيار الجائزة
+            const prizeIndex = getRandomPrize();
+            const prize = prizes[prizeIndex];
+
+            // حساب الزاوية
+            const degreesPerSlice = 360 / 8; // 45 درجة
+            const extraSpins = 5; // عدد الدورات الكاملة
+            const randomOffset = (Math.random() - 0.5) * 20; // إضافة عشوائية
+            
+            // الزاوية النهائية (عكس عقارب الساعة)
+            const targetAngle = (prizeIndex * degreesPerSlice) + (degreesPerSlice / 2) + randomOffset;
+            const totalRotation = (360 * extraSpins) + (360 - targetAngle);
+
+            wheel.style.transform = `rotate(${totalRotation}deg)`;
+
+            // بعد الانتهاء
+            setTimeout(() => {
+                showResult(prize);
+                spinning = false;
+                sendToBot(prize);
+            }, 5000);
+        }
+
+        function showResult(prize) {
+            let msg = '';
+            
+            if (prize.value === 0 && prize.name === 'Hard Luck') {
+                msg = `<span class="emoji-large">😔</span> ${prize.name}<br>حظ أوفر المرة القادمة!`;
+            } else if (prize.value === 'respin') {
+                msg = `<span class="emoji-large">${prize.emoji}</span> ${prize.name}!<br>لفة مجانية إضافية`;
+                hasSpun = false;
+                spinBtn.disabled = false;
+            } else if (prize.value === 'bonus') {
+                msg = `<span class="emoji-large">${prize.emoji}</span> مبروك!<br>بونص ${prize.amount}% على الشحن`;
+            } else if (prize.value === 'percentage') {
+                msg = `<span class="emoji-large">${prize.emoji}</span> مبروك!<br>${prize.amount}% من رصيدك كاش!`;
+            } else if (prize.value === 'premium') {
+                msg = `<span class="emoji-large">${prize.emoji}</span> مبروك!<br>Telegram Premium!`;
+            } else if (prize.value > 0) {
+                msg = `<span class="emoji-large">${prize.emoji}</span> مبروك!<br>ربحت ${prize.amount.toLocaleString()} رصيد!`;
+                launchConfetti();
+            }
+            
+            result.innerHTML = msg;
+        }
+
+        function launchConfetti() {
+            for (let i = 0; i < 80; i++) {
+                setTimeout(() => {
+                    const conf = document.createElement('div');
+                    conf.className = 'confetti';
+                    conf.style.left = Math.random() * 100 + '%';
+                    conf.style.background = ['#8dd5e7', '#6bc4db', '#fff', '#ffd700'][Math.floor(Math.random() * 4)];
+                    conf.style.animationDelay = Math.random() * 0.3 + 's';
+                    document.body.appendChild(conf);
+                    
+                    setTimeout(() => conf.remove(), 3000);
+                }, i * 20);
+            }
+        }
+
+        function sendToBot(prize) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+
+            let rewardValue = 0;
+            let rewardType = 'none';
+
+            if (typeof prize.value === 'number' && prize.value > 0) {
+                rewardValue = prize.value;
+                rewardType = 'balance';
+            } else if (prize.value === 'respin') {
+                rewardType = 'respin';
+            } else if (prize.value === 'bonus') {
+                rewardType = 'bonus';
+                rewardValue = prize.amount;
+            } else if (prize.value === 'premium') {
+                rewardType = 'premium';
+            } else if (prize.value === 'percentage') {
+                rewardType = 'percentage';
+                rewardValue = prize.amount;
+            }
+
+            const data = {
+                type: 'spin',
+                reward: rewardValue,
+                reward_type: rewardType,
+                prize_name: prize.name
+            };
+
+            tg.sendData(JSON.stringify(data));
+        }
+
+        // تهيئة Telegram
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+    </script>
 </body>
 </html>
