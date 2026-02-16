@@ -211,7 +211,7 @@
         const spinButton = document.getElementById('spinButton');
         const resultMessage = document.getElementById('resultMessage');
 
-        // تعريف الأقسام بالترتيب الصحيح من الصورة (من فوق باتجاه عقارب الساعة)
+        // تعريف الأقسام بالترتيب الصحيح من الصورة
         const segments = [
             { 
                 text: 'TELEGRAM\nPREMIUM', 
@@ -279,7 +279,28 @@
         const anglePerSegment = (2 * Math.PI) / totalSegments;
         let currentAngle = 0;
         let isSpinning = false;
-        let hasSpunToday = false; // متغير لمنع اللف أكثر من مرة
+
+        // ⚡ التحقق من آخر لفة باستخدام localStorage
+        function checkLastSpin() {
+            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+            const lastSpinDate = localStorage.getItem('ichancy_last_spin');
+            
+            if (lastSpinDate === today) {
+                return true; // لف اليوم
+            }
+            return false; // لم يلف اليوم
+        }
+
+        // حفظ تاريخ اللفة
+        function saveSpinDate() {
+            const today = new Date().toISOString().split('T')[0];
+            localStorage.setItem('ichancy_last_spin', today);
+        }
+
+        // حذف تاريخ اللفة (للـ RESPIN)
+        function clearSpinDate() {
+            localStorage.removeItem('ichancy_last_spin');
+        }
 
         // رسم العجلة
         function drawWheel() {
@@ -348,14 +369,19 @@
         function spin() {
             if (isSpinning) return;
 
-            // التحقق من اللف اليومي
-            if (hasSpunToday) {
-                resultMessage.innerHTML = '<div class="warning-message">⏰ لقد استخدمت لفتك اليوم!<br>🎁 عد غداً لفرصة جديدة</div>';
+            // ⚡ التحقق من آخر لفة
+            if (checkLastSpin()) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tomorrowStr = tomorrow.toISOString().split('T')[0];
+                
+                resultMessage.innerHTML = `<div class="warning-message">⏰ لقد استخدمت لفتك اليوم!<br>🎁 اللفة القادمة: ${tomorrowStr}<br>⏳ عد غداً لفرصة جديدة</div>`;
+                spinButton.disabled = true;
+                spinButton.textContent = '✅ تم اللف لليوم';
                 return;
             }
 
             isSpinning = true;
-            hasSpunToday = true; // منع اللف مرة ثانية
             spinButton.disabled = true;
             resultMessage.textContent = '';
             resultMessage.classList.remove('celebrate');
@@ -367,10 +393,12 @@
             if (random < 0.90) {
                 // 90% فرصة HARD LUCK
                 targetSegmentIndex = 4; // HARD LUCK في index 4
+                console.log('🎯 Selected: HARD LUCK (90% probability)');
             } else {
                 // 10% فرصة باقي الجوائز (موزعة بالتساوي)
                 const otherSegments = [0, 1, 2, 3, 5, 6, 7];
                 targetSegmentIndex = otherSegments[Math.floor(Math.random() * otherSegments.length)];
+                console.log('🎯 Selected: ' + segments[targetSegmentIndex].text + ' (10% probability)');
             }
 
             // حساب الزاوية المطلوبة للوصول للقسم المستهدف
@@ -403,9 +431,8 @@
                 } else {
                     const winner = segments[targetSegmentIndex];
                     
-                    console.log('🎯 Target Index:', targetSegmentIndex);
-                    console.log('🏆 Winner:', winner.text);
-                    console.log('📊 Probability: ' + (random < 0.90 ? '90% HARD LUCK' : '10% Other'));
+                    console.log('🏆 Final Winner:', winner.text);
+                    console.log('📊 Random value:', random);
                     
                     showResult(winner);
                 }
@@ -432,11 +459,17 @@
                     prize_name: winner.text.replace('\n', ' ')
                 };
 
+                // ⚡ حفظ تاريخ اللفة (إلا إذا كانت RESPIN)
+                if (winner.reward_type !== 'respin') {
+                    saveSpinDate();
+                }
+
                 if (winner.reward > 0) {
                     message = `🎉 مبروك! ربحت ${winner.reward.toLocaleString('ar-EG')} ل.س! 💰`;
                 } else if (winner.reward_type === 'respin') {
                     message = '🔄 مبروك! حصلت على لفة إضافية مجانية! 🎊';
-                    hasSpunToday = false; // السماح باللف مرة ثانية
+                    // لا نحفظ التاريخ - السماح باللف مرة ثانية
+                    clearSpinDate();
                 } else if (winner.reward_type === 'premium') {
                     message = '⭐ مبروك! ربحت Telegram Premium! 🎁';
                 } else if (winner.reward_type === 'bonus') {
@@ -460,7 +493,7 @@
 
                 isSpinning = false;
                 
-                // عدم تفعيل الزر إلا إذا كانت النتيجة RESPIN
+                // تعطيل الزر إلا إذا كانت النتيجة RESPIN
                 if (winner.reward_type !== 'respin') {
                     spinButton.disabled = true;
                     spinButton.textContent = '✅ تم اللف لليوم';
@@ -503,9 +536,25 @@
             }
         }
 
+        // ⚡ التحقق عند فتح الصفحة
+        function initPage() {
+            drawWheel();
+            createStars();
+            
+            // التحقق إذا المستخدم لف اليوم
+            if (checkLastSpin()) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tomorrowStr = tomorrow.toISOString().split('T')[0];
+                
+                resultMessage.innerHTML = `<div class="warning-message">⏰ لقد استخدمت لفتك اليوم!<br>🎁 اللفة القادمة: ${tomorrowStr}</div>`;
+                spinButton.disabled = true;
+                spinButton.textContent = '✅ تم اللف لليوم';
+            }
+        }
+
         // التهيئة
-        drawWheel();
-        createStars();
+        initPage();
 
         // Telegram WebApp
         if (window.Telegram && window.Telegram.WebApp) {
