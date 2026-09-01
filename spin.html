@@ -1,568 +1,510 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎡 عجلة الحظ - Ichancy</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>عجلة الحظ - Scarface</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0c;
+    --surface:#141318;
+    --surface-2:#1c1b21;
+    --gold:#d4af37;
+    --gold-light:#f3e0a0;
+    --gold-dark:#8a621f;
+    --burgundy:#6e1f28;
+    --charcoal:#201f26;
+    --cream:#f3ecd9;
+    --muted:#9c96a4;
+    --disabled:#3a3940;
+  }
 
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            overflow: hidden;
-        }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 
-        .stars {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
+  html,body{
+    margin:0;
+    padding:0;
+    background:var(--bg);
+    color:var(--cream);
+    font-family:'Cairo', 'Segoe UI', Tahoma, sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
 
-        .star {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle 3s infinite;
-        }
+  body{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:22px 16px 32px;
+  }
 
-        @keyframes twinkle {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
-        }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:2px;
+  }
 
-        .container {
-            text-align: center;
-            position: relative;
-            z-index: 10;
-            padding: 20px;
-        }
+  .brand .mark{
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, var(--gold-light), var(--gold) 55%, var(--gold-dark) 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+  }
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-            animation: glow 2s ease-in-out infinite alternate;
-        }
+  .brand span{
+    font-weight:800;
+    font-size:15px;
+    letter-spacing:.5px;
+    background:linear-gradient(135deg, var(--gold-light), var(--gold) 45%, var(--gold-dark));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
 
-        @keyframes glow {
-            from { text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff; }
-            to { text-shadow: 0 0 20px #fff, 0 0 30px #ff4da6, 0 0 40px #ff4da6; }
-        }
+  h1{
+    font-size:20px;
+    font-weight:700;
+    margin:6px 0 22px;
+    color:var(--cream);
+  }
 
-        .subtitle {
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-            opacity: 0.95;
-        }
+  .wheel-wrap{
+    position:relative;
+    width:min(78vw, 320px);
+    height:min(78vw, 320px);
+    margin-bottom:22px;
+  }
 
-        .wheel-container {
-            position: relative;
-            width: 400px;
-            height: 400px;
-            margin: 0 auto 2rem;
-        }
+  .pointer{
+    position:absolute;
+    top:-6px;
+    left:50%;
+    transform:translateX(-50%);
+    width:0;
+    height:0;
+    border-left:14px solid transparent;
+    border-right:14px solid transparent;
+    border-top:24px solid var(--gold);
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));
+    z-index:5;
+  }
 
-        .pointer {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 25px solid transparent;
-            border-right: 25px solid transparent;
-            border-top: 40px solid #9ae6ff;
-            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
-            z-index: 30;
-            animation: bounce 1s ease-in-out infinite;
-        }
+  .rim{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    background:conic-gradient(from 0deg, var(--gold-light), var(--gold), var(--gold-dark), var(--gold), var(--gold-light));
+    padding:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.08);
+  }
 
-        @keyframes bounce {
-            0%, 100% { top: -25px; }
-            50% { top: -20px; }
-        }
+  .rim-inner{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    background:var(--bg);
+    padding:6px;
+  }
 
-        #wheelCanvas {
-            border-radius: 50%;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-            cursor: pointer;
-            transition: transform 0.3s;
-            border: 5px solid #5dd5ed;
-        }
+  #wheelGroup{
+    width:100%;
+    height:100%;
+    transition:transform 4.2s cubic-bezier(.12,.67,.1,1);
+    transform:rotate(0deg);
+  }
 
-        #wheelCanvas:hover {
-            transform: scale(1.03);
-        }
+  #wheelGroup.dim path{ opacity:.35; }
+  #wheelGroup.dim text{ opacity:.35; }
 
-        .spin-button {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border: none;
-            padding: 18px 50px;
-            font-size: 1.4rem;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.5);
-            transition: all 0.3s;
-            font-weight: bold;
-            margin-top: 10px;
-        }
+  .hub{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:22%;
+    height:22%;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #8e2731, var(--burgundy) 60%, #430f16 100%);
+    border:3px solid var(--gold);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 4px 10px rgba(0,0,0,.5);
+    cursor:pointer;
+    z-index:4;
+  }
 
-        .spin-button:hover:not(:disabled) {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(245, 87, 108, 0.7);
-        }
+  .hub span{
+    font-size:11px;
+    font-weight:800;
+    color:var(--gold-light);
+    letter-spacing:.5px;
+  }
 
-        .spin-button:disabled {
-            background: linear-gradient(135deg, #555, #777);
-            cursor: not-allowed;
-            box-shadow: none;
-        }
+  .hub.disabled{
+    cursor:default;
+    filter:grayscale(.6) brightness(.7);
+  }
 
-        .result-message {
-            margin-top: 1.5rem;
-            font-size: 1.6rem;
-            font-weight: bold;
-            min-height: 60px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
+  .status{
+    min-height:20px;
+    text-align:center;
+    font-size:14px;
+    color:var(--muted);
+    margin-bottom:14px;
+    line-height:1.7;
+  }
 
-        @keyframes celebration {
-            0% { transform: scale(0.5) rotate(-5deg); opacity: 0; }
-            50% { transform: scale(1.2) rotate(5deg); opacity: 1; }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
+  .status b{ color:var(--gold-light); font-weight:700; }
 
-        .celebrate {
-            animation: celebration 0.6s ease-out;
-        }
+  .btn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    width:min(84vw, 320px);
+    padding:14px 20px;
+    border-radius:14px;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:800;
+    text-align:center;
+    transition:transform .15s ease, opacity .15s ease;
+  }
 
-        .confetti {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            background: #f0f;
-            position: absolute;
-            animation: confetti-fall 3s linear;
-        }
+  .btn:active{ transform:scale(.97); }
 
-        @keyframes confetti-fall {
-            to {
-                transform: translateY(100vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-dark));
+    color:#241a06;
+  }
 
-        .warning-message {
-            background: rgba(255, 100, 100, 0.2);
-            border: 2px solid #ff6b6b;
-            border-radius: 15px;
-            padding: 15px 25px;
-            margin-top: 20px;
-            font-size: 1.2rem;
-            animation: shake 0.5s;
-        }
+  .btn-primary:disabled{
+    background:var(--disabled);
+    color:var(--muted);
+    cursor:default;
+  }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-    </style>
+  .divider{
+    width:min(84vw, 320px);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:22px 0 14px;
+    color:var(--muted);
+    font-size:12px;
+  }
+
+  .divider::before, .divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:linear-gradient(90deg, transparent, rgba(212,175,55,.35), transparent);
+  }
+
+  .btn-ghost{
+    background:transparent;
+    border:1.5px solid var(--gold-dark);
+    color:var(--gold-light);
+  }
+
+  .trial-note{
+    max-width:min(84vw, 320px);
+    text-align:center;
+    font-size:12px;
+    color:var(--muted);
+    margin-top:10px;
+    line-height:1.7;
+  }
+
+  .result{
+    position:fixed;
+    inset:0;
+    background:rgba(6,6,8,.86);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    z-index:20;
+  }
+
+  .result.show{ display:flex; }
+
+  .result-card{
+    width:100%;
+    max-width:320px;
+    background:var(--surface);
+    border:1px solid rgba(212,175,55,.35);
+    border-radius:20px;
+    padding:28px 22px;
+    text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,.6);
+  }
+
+  .result-icon{ font-size:44px; margin-bottom:10px; }
+
+  .result-title{
+    font-size:19px;
+    font-weight:800;
+    color:var(--gold-light);
+    margin-bottom:6px;
+  }
+
+  .result-prize{
+    font-size:16px;
+    font-weight:700;
+    color:var(--cream);
+    margin-bottom:10px;
+  }
+
+  .result-sub{
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:22px;
+    line-height:1.7;
+  }
+
+  .error-box{
+    text-align:center;
+    color:var(--muted);
+    font-size:14px;
+    padding:40px 20px;
+    line-height:1.8;
+  }
+</style>
 </head>
 <body>
-    <div class="stars" id="stars"></div>
 
-    <div class="container">
-        <h1>🎡 عجلة الحظ</h1>
-        <p class="subtitle">✨ لفة مجانية واحدة يومياً ✨</p>
+  <div class="brand">
+    <div class="mark">🂡</div>
+    <span>SCARFACE</span>
+  </div>
+  <h1>🎡 عجلة الحظ</h1>
 
-        <div class="wheel-container">
-            <div class="pointer"></div>
-            <canvas id="wheelCanvas" width="400" height="400"></canvas>
-        </div>
+  <div id="app"></div>
 
-        <button class="spin-button" id="spinButton" onclick="spin()">
-            🎰 لف العجلة الآن!
-        </button>
-
-        <div class="result-message" id="resultMessage"></div>
+  <div class="result" id="resultOverlay">
+    <div class="result-card">
+      <div class="result-icon" id="resultIcon">🎉</div>
+      <div class="result-title" id="resultTitle">مبروك!</div>
+      <div class="result-prize" id="resultPrize"></div>
+      <div class="result-sub" id="resultSub"></div>
+      <button class="btn btn-primary" id="closeBtn">إغلاق</button>
     </div>
+  </div>
 
-    <script>
-        const canvas = document.getElementById('wheelCanvas');
-        const ctx = canvas.getContext('2d');
-        const spinButton = document.getElementById('spinButton');
-        const resultMessage = document.getElementById('resultMessage');
+<script>
+(function(){
+  const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  if (tg) { try { tg.ready(); tg.expand(); } catch(e){} }
 
-        // تعريف الأقسام بالترتيب الصحيح من الصورة
-        const segments = [
-            { 
-                text: 'TELEGRAM\nPREMIUM', 
-                reward: 0, 
-                reward_type: 'premium', 
-                color: '#0f3460',
-                textColor: '#fff',
-                icon: '⭐'
-            },
-            { 
-                text: 'RESPIN', 
-                reward: 0, 
-                reward_type: 'respin', 
-                color: '#5dd5ed',
-                textColor: '#0f3460',
-                icon: '🔄'
-            },
-            { 
-                text: '10,000', 
-                reward: 10000, 
-                color: '#0f3460',
-                textColor: '#fff',
-                icon: '💰'
-            },
-            { 
-                text: '20,000', 
-                reward: 20000, 
-                color: '#5dd5ed',
-                textColor: '#0f3460',
-                icon: '💎'
-            },
-            { 
-                text: 'HARD LUCK', 
-                reward: 0, 
-                color: '#0f3460',
-                textColor: '#fff',
-                icon: '⛔'
-            },
-            { 
-                text: '5% BONUS', 
-                reward: 0, 
-                reward_type: 'bonus', 
-                color: '#5dd5ed',
-                textColor: '#0f3460',
-                icon: '🎁'
-            },
-            { 
-                text: '10,000', 
-                reward: 10000, 
-                color: '#0f3460',
-                textColor: '#fff',
-                icon: '💰'
-            },
-            { 
-                text: '10% BONUS', 
-                reward: 0, 
-                reward_type: 'bonus', 
-                color: '#5dd5ed',
-                textColor: '#0f3460',
-                icon: '🎯'
-            }
-        ];
+  const app = document.getElementById("app");
 
-        const totalSegments = segments.length;
-        const anglePerSegment = (2 * Math.PI) / totalSegments;
-        let currentAngle = 0;
-        let isSpinning = false;
+  function parsePayload(){
+    try{
+      const params = new URLSearchParams(window.location.search);
+      const raw = params.get("data");
+      if (!raw) return null;
+      const obj = JSON.parse(raw);
+      if (!obj || !Array.isArray(obj.labels) || obj.labels.length === 0) return null;
+      return obj;
+    }catch(e){
+      return null;
+    }
+  }
 
-        // ⚡ التحقق من آخر لفة باستخدام localStorage
-        function checkLastSpin() {
-            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-            const lastSpinDate = localStorage.getItem('ichancy_last_spin');
-            
-            if (lastSpinDate === today) {
-                return true; // لف اليوم
-            }
-            return false; // لم يلف اليوم
-        }
+  function showError(){
+    app.innerHTML = '<div class="error-box">⚠️ تعذّر تحميل العجلة.<br>الرجاء العودة للبوت والضغط على "🆓 اللفة المجانية" مجدداً.</div>';
+  }
 
-        // حفظ تاريخ اللفة
-        function saveSpinDate() {
-            const today = new Date().toISOString().split('T')[0];
-            localStorage.setItem('ichancy_last_spin', today);
-        }
+  const SEGMENT_COLORS = ["#6e1f28", "#201f26"];
 
-        // حذف تاريخ اللفة (للـ RESPIN)
-        function clearSpinDate() {
-            localStorage.removeItem('ichancy_last_spin');
-        }
+  function buildWheelSVG(labels){
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 500 500");
+    svg.setAttribute("id", "wheelGroup");
 
-        // رسم العجلة
-        function drawWheel() {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = 180;
+    const n = labels.length;
+    const anglePer = 360 / n;
+    const cx = 250, cy = 250, R = 244;
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < n; i++){
+      const startAngle = i * anglePer - 90;
+      const endAngle = startAngle + anglePer;
+      const startRad = startAngle * Math.PI/180;
+      const endRad = endAngle * Math.PI/180;
 
-            const startOffset = -Math.PI / 2;
+      const x1 = cx + R * Math.cos(startRad);
+      const y1 = cy + R * Math.sin(startRad);
+      const x2 = cx + R * Math.cos(endRad);
+      const y2 = cy + R * Math.sin(endRad);
+      const largeArc = anglePer > 180 ? 1 : 0;
 
-            segments.forEach((segment, index) => {
-                const startAngle = startOffset + currentAngle + index * anglePerSegment;
-                const endAngle = startAngle + anglePerSegment;
-                const midAngle = startAngle + anglePerSegment / 2;
+      const path = document.createElementNS(svgNS, "path");
+      path.setAttribute("d", `M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${R} ${R} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`);
+      path.setAttribute("fill", SEGMENT_COLORS[i % 2]);
+      path.setAttribute("stroke", "#d4af37");
+      path.setAttribute("stroke-width", "2");
+      svg.appendChild(path);
 
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-                ctx.closePath();
-                ctx.fillStyle = segment.color;
-                ctx.fill();
-                
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 3;
-                ctx.stroke();
+      const midAngle = startAngle + anglePer/2;
+      const midRad = midAngle * Math.PI/180;
+      const labelR = R * 0.64;
+      const lx = cx + labelR * Math.cos(midRad);
+      const ly = cy + labelR * Math.sin(midRad);
 
-                ctx.save();
-                ctx.translate(centerX, centerY);
-                ctx.rotate(midAngle);
-                ctx.textAlign = 'center';
-                ctx.fillStyle = segment.textColor;
-                
-                ctx.font = 'bold 28px Arial';
-                ctx.fillText(segment.icon, radius * 0.65, -15);
-                
-                ctx.font = 'bold 16px Arial';
-                const lines = segment.text.split('\n');
-                lines.forEach((line, i) => {
-                    ctx.fillText(line, radius * 0.65, 5 + i * 18);
-                });
-                
-                ctx.restore();
-            });
+      const text = document.createElementNS(svgNS, "text");
+      text.setAttribute("x", lx.toFixed(2));
+      text.setAttribute("y", ly.toFixed(2));
+      text.setAttribute("fill", "#f3ecd9");
+      text.setAttribute("font-size", n > 6 ? "15" : "18");
+      text.setAttribute("font-weight", "700");
+      text.setAttribute("font-family", "Cairo, sans-serif");
+      text.setAttribute("text-anchor", "middle");
+      text.setAttribute("dominant-baseline", "middle");
+      text.setAttribute("transform", `rotate(${(midAngle+90).toFixed(2)}, ${lx.toFixed(2)}, ${ly.toFixed(2)})`);
+      text.textContent = labels[i];
+      svg.appendChild(text);
+    }
 
-            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 50);
-            gradient.addColorStop(0, '#5dd5ed');
-            gradient.addColorStop(1, '#0f3460');
-            
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 50, 0, 2 * Math.PI);
-            ctx.fillStyle = gradient;
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 4;
-            ctx.stroke();
+    return svg;
+  }
 
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 35px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('⭐', centerX, centerY);
-        }
+  function computeRotation(index, n, currentTotal){
+    const anglePer = 360 / n;
+    let centerAngle = (index + 0.5) * anglePer - 90;
+    centerAngle = ((centerAngle % 360) + 360) % 360;
+    const needed = (270 - centerAngle + 360) % 360;
+    const baseFullSpins = 6;
+    const currentMod = ((currentTotal % 360) + 360) % 360;
+    let extra = needed - currentMod;
+    if (extra < 0) extra += 360;
+    return currentTotal + baseFullSpins * 360 + extra;
+  }
 
-        // دوران العجلة مع 90% احتمال HARD LUCK
-        function spin() {
-            if (isSpinning) return;
+  function init(payload){
+    const labels = payload.labels;
+    const n = labels.length;
 
-            // ⚡ التحقق من آخر لفة
-            if (checkLastSpin()) {
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                const tomorrowStr = tomorrow.toISOString().split('T')[0];
-                
-                resultMessage.innerHTML = `<div class="warning-message">⏰ لقد استخدمت لفتك اليوم!<br>🎁 اللفة القادمة: ${tomorrowStr}<br>⏳ عد غداً لفرصة جديدة</div>`;
-                spinButton.disabled = true;
-                spinButton.textContent = '✅ تم اللف لليوم';
-                return;
-            }
+    app.innerHTML = `
+      <div class="wheel-wrap">
+        <div class="pointer"></div>
+        <div class="rim"><div class="rim-inner" id="svgHost"></div></div>
+        <div class="hub" id="hubBtn"><span>ابدأ</span></div>
+      </div>
+      <div class="status" id="statusText"></div>
+      <button class="btn btn-primary" id="mainBtn"></button>
+      <div class="divider">أو</div>
+      <button class="btn btn-ghost" id="trialBtn">🎡 لفة تجريبية</button>
+      <div class="trial-note">اللفة التجريبية مخصصة لتجربة العجلة فقط، وليست حقيقية ولا يُصرف عليها أي جائزة.</div>
+    `;
 
-            isSpinning = true;
-            spinButton.disabled = true;
-            resultMessage.textContent = '';
-            resultMessage.classList.remove('celebrate');
+    const svgHost = document.getElementById("svgHost");
+    const svg = buildWheelSVG(labels);
+    svgHost.appendChild(svg);
 
-            // ⚡ تحديد النتيجة مسبقاً - 90% HARD LUCK
-            const random = Math.random();
-            let targetSegmentIndex;
-            
-            if (random < 0.90) {
-                // 90% فرصة HARD LUCK
-                targetSegmentIndex = 4; // HARD LUCK في index 4
-                console.log('🎯 Selected: HARD LUCK (90% probability)');
-            } else {
-                // 10% فرصة باقي الجوائز (موزعة بالتساوي)
-                const otherSegments = [0, 1, 2, 3, 5, 6, 7];
-                targetSegmentIndex = otherSegments[Math.floor(Math.random() * otherSegments.length)];
-                console.log('🎯 Selected: ' + segments[targetSegmentIndex].text + ' (10% probability)');
-            }
+    const hubBtn = document.getElementById("hubBtn");
+    const mainBtn = document.getElementById("mainBtn");
+    const trialBtn = document.getElementById("trialBtn");
+    const statusText = document.getElementById("statusText");
 
-            // حساب الزاوية المطلوبة للوصول للقسم المستهدف
-            const minSpins = 5;
-            const maxSpins = 8;
-            const spins = minSpins + Math.random() * (maxSpins - minSpins);
-            
-            // إضافة تنويع صغير داخل القسم المستهدف
-            const randomOffsetWithinSegment = (Math.random() - 0.5) * anglePerSegment * 0.8;
-            const targetAngle = targetSegmentIndex * anglePerSegment + (anglePerSegment / 2) + randomOffsetWithinSegment;
-            
-            const totalRotation = spins * 2 * Math.PI + targetAngle;
-            
-            const duration = 5000;
-            const startTime = Date.now();
-            const startAngle = currentAngle;
+    let currentRotation = 0;
+    let spinning = false;
 
-            function animate() {
-                const now = Date.now();
-                const elapsed = now - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                
-                const easeOut = 1 - Math.pow(1 - progress, 4);
-                
-                currentAngle = startAngle + totalRotation * easeOut;
-                drawWheel();
+    const eligible = !!payload.eligible && Number.isInteger(payload.land);
 
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    const winner = segments[targetSegmentIndex];
-                    
-                    console.log('🏆 Final Winner:', winner.text);
-                    console.log('📊 Random value:', random);
-                    
-                    showResult(winner);
-                }
-            }
+    if (eligible){
+      statusText.innerHTML = "🎁 لديك لفة مجانية جاهزة الآن!";
+      mainBtn.textContent = "🎡 لف العجلة الآن";
+      mainBtn.disabled = false;
+    } else {
+      const remaining = payload.remaining || "قريباً";
+      statusText.innerHTML = `⏰ التدويرة التالية خلال <b>${remaining}</b>`;
+      mainBtn.textContent = "🔒 غير متاحة الآن";
+      mainBtn.disabled = true;
+      svg.classList.add("dim");
+      hubBtn.classList.add("disabled");
+    }
 
-            animate();
-        }
+    function spin(index, isReal){
+      if (spinning) return;
+      spinning = true;
+      mainBtn.disabled = true;
+      trialBtn.disabled = true;
+      hubBtn.classList.add("disabled");
 
-        // عرض النتيجة
-        function showResult(winner) {
-            setTimeout(() => {
-                resultMessage.classList.add('celebrate');
-                
-                // عرض كونفيتي فقط للجوائز (مش HARD LUCK)
-                if (winner.reward > 0 || winner.reward_type !== undefined) {
-                    createConfetti();
-                }
-                
-                let message = '';
-                let data = {
-                    type: 'spin',
-                    reward: winner.reward || 0,
-                    reward_type: winner.reward_type || 'none',
-                    prize_name: winner.text.replace('\n', ' ')
-                };
+      currentRotation = computeRotation(index, n, currentRotation);
+      svg.style.transform = `rotate(${currentRotation}deg)`;
 
-                // ⚡ حفظ تاريخ اللفة (إلا إذا كانت RESPIN)
-                if (winner.reward_type !== 'respin') {
-                    saveSpinDate();
-                }
+      setTimeout(() => {
+        spinning = false;
+        showResult(labels[index], isReal);
+      }, 4300);
+    }
 
-                if (winner.reward > 0) {
-                    message = `🎉 مبروك! ربحت ${winner.reward.toLocaleString('ar-EG')} ل.س! 💰`;
-                } else if (winner.reward_type === 'respin') {
-                    message = '🔄 مبروك! حصلت على لفة إضافية مجانية! 🎊';
-                    // لا نحفظ التاريخ - السماح باللف مرة ثانية
-                    clearSpinDate();
-                } else if (winner.reward_type === 'premium') {
-                    message = '⭐ مبروك! ربحت Telegram Premium! 🎁';
-                } else if (winner.reward_type === 'bonus') {
-                    if (winner.text.includes('10%')) {
-                        message = '🎯 مبروك! حصلت على بونص 10% على شحنتك القادمة! 🎉';
-                    } else {
-                        message = '🎁 مبروك! حصلت على بونص 5% على شحنتك القادمة! 🎉';
-                    }
-                } else {
-                    message = '😔 حظ أوفر في المرة القادمة! 🍀';
-                }
+    function showResult(label, isReal){
+      const overlay = document.getElementById("resultOverlay");
+      const icon = document.getElementById("resultIcon");
+      const title = document.getElementById("resultTitle");
+      const prize = document.getElementById("resultPrize");
+      const sub = document.getElementById("resultSub");
 
-                resultMessage.innerHTML = message;
+      if (isReal){
+        icon.textContent = "🎉";
+        title.textContent = "مبروك!";
+        prize.textContent = label;
+        sub.textContent = "✅ تمت إضافة جائزتك إلى رصيدك بالفعل.";
+      } else {
+        icon.textContent = "🎡";
+        title.textContent = "لفة تجريبية";
+        prize.textContent = label;
+        sub.textContent = "هذه لفة تجريبية فقط ولم يتم صرف أي جائزة. عد لاحقاً لتجربة لفتك الحقيقية!";
+      }
 
-                // إرسال للبوت
-                if (window.Telegram && window.Telegram.WebApp) {
-                    setTimeout(() => {
-                        window.Telegram.WebApp.sendData(JSON.stringify(data));
-                    }, 1000);
-                }
+      overlay.classList.add("show");
 
-                isSpinning = false;
-                
-                // تعطيل الزر إلا إذا كانت النتيجة RESPIN
-                if (winner.reward_type !== 'respin') {
-                    spinButton.disabled = true;
-                    spinButton.textContent = '✅ تم اللف لليوم';
-                } else {
-                    spinButton.disabled = false;
-                    spinButton.textContent = '🎰 لف مرة أخرى!';
-                }
-            }, 800);
-        }
+      if (tg && isReal){
+        try { tg.HapticFeedback && tg.HapticFeedback.notificationOccurred("success"); } catch(e){}
+      }
+    }
 
-        // كونفيتي
-        function createConfetti() {
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-            for (let i = 0; i < 50; i++) {
-                setTimeout(() => {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
-                    confetti.style.left = Math.random() * window.innerWidth + 'px';
-                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.top = '-10px';
-                    document.body.appendChild(confetti);
+    if (eligible){
+      mainBtn.addEventListener("click", () => spin(payload.land, true));
+      hubBtn.addEventListener("click", () => spin(payload.land, true));
+    } else {
+      trialBtn.addEventListener("click", () => {
+        const randomIndex = Math.floor(Math.random() * n);
+        spin(randomIndex, false);
+      });
+    }
 
-                    setTimeout(() => {
-                        confetti.remove();
-                    }, 3000);
-                }, i * 30);
-            }
-        }
+    if (n === 0){
+      trialBtn.style.display = "none";
+    } else if (!eligible) {
+      trialBtn.addEventListener("click", () => {}, { once:false });
+    }
+  }
 
-        // إنشاء النجوم
-        function createStars() {
-            const starsContainer = document.getElementById('stars');
-            for (let i = 0; i < 100; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.animationDelay = Math.random() * 3 + 's';
-                starsContainer.appendChild(star);
-            }
-        }
+  document.getElementById("closeBtn").addEventListener("click", () => {
+    if (tg){ try { tg.close(); return; } catch(e){} }
+    document.getElementById("resultOverlay").classList.remove("show");
+  });
 
-        // ⚡ التحقق عند فتح الصفحة
-        function initPage() {
-            drawWheel();
-            createStars();
-            
-            // التحقق إذا المستخدم لف اليوم
-            if (checkLastSpin()) {
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                const tomorrowStr = tomorrow.toISOString().split('T')[0];
-                
-                resultMessage.innerHTML = `<div class="warning-message">⏰ لقد استخدمت لفتك اليوم!<br>🎁 اللفة القادمة: ${tomorrowStr}</div>`;
-                spinButton.disabled = true;
-                spinButton.textContent = '✅ تم اللف لليوم';
-            }
-        }
-
-        // التهيئة
-        initPage();
-
-        // Telegram WebApp
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-            window.Telegram.WebApp.setHeaderColor('#667eea');
-            window.Telegram.WebApp.setBackgroundColor('#667eea');
-        }
-    </script>
+  const payload = parsePayload();
+  if (!payload){
+    showError();
+  } else {
+    init(payload);
+  }
+})();
+</script>
 </body>
 </html>
