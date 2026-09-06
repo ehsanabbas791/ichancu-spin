@@ -326,6 +326,25 @@
 
   const SEGMENT_COLORS = ["#6e1f28", "#201f26"];
 
+  function wrapLabel(label, maxCharsPerLine){
+    const words = label.split(" ").filter(Boolean);
+    const lines = [];
+    let current = "";
+
+    for (const word of words){
+      const candidate = current ? current + " " + word : word;
+      if (candidate.length > maxCharsPerLine && current){
+        lines.push(current);
+        current = word;
+      } else {
+        current = candidate;
+      }
+    }
+    if (current) lines.push(current);
+
+    return lines.slice(0, 3);
+  }
+
   function buildWheelSVG(labels){
     const svgNS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(svgNS, "svg");
@@ -335,6 +354,14 @@
     const n = labels.length;
     const anglePer = 360 / n;
     const cx = 250, cy = 250, R = 244;
+
+    let maxCharsPerLine = 14;
+    if (n > 4) maxCharsPerLine = 11;
+    if (n > 6) maxCharsPerLine = 9;
+    if (n > 8) maxCharsPerLine = 7;
+
+    const fontSize = n > 8 ? 13 : (n > 6 ? 14 : (n > 4 ? 16 : 18));
+    const lineHeight = fontSize * 1.18;
 
     for (let i = 0; i < n; i++){
       const startAngle = i * anglePer - 90;
@@ -357,21 +384,31 @@
 
       const midAngle = startAngle + anglePer/2;
       const midRad = midAngle * Math.PI/180;
-      const labelR = R * 0.64;
+      const labelR = R * 0.62;
       const lx = cx + labelR * Math.cos(midRad);
       const ly = cy + labelR * Math.sin(midRad);
+
+      const lines = wrapLabel(labels[i], maxCharsPerLine);
+      const blockOffset = -((lines.length - 1) * lineHeight) / 2;
 
       const text = document.createElementNS(svgNS, "text");
       text.setAttribute("x", lx.toFixed(2));
       text.setAttribute("y", ly.toFixed(2));
       text.setAttribute("fill", "#f3ecd9");
-      text.setAttribute("font-size", n > 6 ? "15" : "18");
+      text.setAttribute("font-size", String(fontSize));
       text.setAttribute("font-weight", "700");
       text.setAttribute("font-family", "Cairo, sans-serif");
       text.setAttribute("text-anchor", "middle");
-      text.setAttribute("dominant-baseline", "middle");
       text.setAttribute("transform", `rotate(${(midAngle+90).toFixed(2)}, ${lx.toFixed(2)}, ${ly.toFixed(2)})`);
-      text.textContent = labels[i];
+
+      lines.forEach((line, idx) => {
+        const tspan = document.createElementNS(svgNS, "tspan");
+        tspan.setAttribute("x", lx.toFixed(2));
+        tspan.setAttribute("dy", idx === 0 ? `${blockOffset.toFixed(2)}` : `${lineHeight.toFixed(2)}`);
+        tspan.textContent = line;
+        text.appendChild(tspan);
+      });
+
       svg.appendChild(text);
     }
 
