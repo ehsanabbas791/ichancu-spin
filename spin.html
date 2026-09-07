@@ -471,7 +471,7 @@
       hubBtn.classList.add("disabled");
     }
 
-    function spin(index, isReal){
+    function spin(index, isReal, prizeType){
       if (spinning) return;
       spinning = true;
       mainBtn.disabled = true;
@@ -483,11 +483,11 @@
 
       setTimeout(() => {
         spinning = false;
-        showResult(labels[index], isReal);
+        showResult(labels[index], isReal, prizeType);
       }, 4300);
     }
 
-    function showResult(label, isReal){
+    function showResult(label, isReal, prizeType){
       const overlay = document.getElementById("resultOverlay");
       const icon = document.getElementById("resultIcon");
       const title = document.getElementById("resultTitle");
@@ -495,10 +495,25 @@
       const sub = document.getElementById("resultSub");
 
       if (isReal){
-        icon.textContent = "🎉";
-        title.textContent = "مبروك!";
         prize.textContent = label;
-        sub.textContent = "✅ تمت إضافة جائزتك إلى رصيدك بالفعل.";
+
+        if (prizeType === "respin"){
+          icon.textContent = "🔄";
+          title.textContent = "مبروك! لفة إضافية";
+          sub.textContent = "ما في داعي تنتظر — رجّع عالبوت وضغط \"🆓 اللفة المجانية\" وجرب حظك فوراً مرة كمان 🎡";
+        } else if (prizeType === "custom_message"){
+          icon.textContent = "🎁";
+          title.textContent = "مبروك!";
+          sub.textContent = "📞 هاي جائزة خاصة — تواصل مع الإدارة داخل البوت لاستلامها.";
+        } else if (prizeType === "none"){
+          icon.textContent = "😔";
+          title.textContent = "حظ أوفر";
+          sub.textContent = "ما ربحت هالمرة. جرب مرة جديدة بعد انتهاء مدة الانتظار القادمة.";
+        } else {
+          icon.textContent = "🎉";
+          title.textContent = "مبروك!";
+          sub.textContent = "✅ تمت إضافة الجائزة إلى رصيدك بالفعل.";
+        }
       } else {
         icon.textContent = "🎡";
         title.textContent = "لفة تجريبية";
@@ -514,12 +529,12 @@
     }
 
     if (eligible){
-      mainBtn.addEventListener("click", () => spin(payload.land, true));
-      hubBtn.addEventListener("click", () => spin(payload.land, true));
+      mainBtn.addEventListener("click", () => spin(payload.land, true, payload.prize_type));
+      hubBtn.addEventListener("click", () => spin(payload.land, true, payload.prize_type));
     } else {
       trialBtn.addEventListener("click", () => {
         const randomIndex = Math.floor(Math.random() * n);
-        spin(randomIndex, false);
+        spin(randomIndex, false, null);
       });
     }
 
